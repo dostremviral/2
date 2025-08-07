@@ -1,0 +1,122 @@
+/* Sembunyikan kontrol default browser */
+video::-webkit-media-controls {
+  display: none !important;
+}
+video::-webkit-media-controls-enclosure {
+  display: none !important;
+}
+
+/* Pastikan container video responsif dan terpusat */
+#video-container {
+  max-width: 100vw;
+  max-height: 100vh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Custom styling untuk Plyr */
+.plyr {
+  --plyr-color-main: #3b82f6;
+  --plyr-control-spacing: 8px;
+  --plyr-control-icon-size: 18px;
+  --plyr-progress-height: 6px;
+  --plyr-video-background: transparent;
+}
+
+.plyr__controls {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+  padding: 12px;
+  border-radius: 0 0 10px 10px;
+  max-width: 100%;
+  box-sizing: border-box;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.plyr__control {
+  transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
+}
+.plyr__control:hover {
+  transform: scale(1.1);
+  background-color: rgba(59, 130, 246, 0.2);
+}
+
+.plyr__progress__buffer {
+  background: #4b5563;
+}
+.plyr__progress__buffer::-webkit-progress-value {
+  background: #3b82f6;
+}
+.plyr__time {
+  font-size: 14px;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.plyr__menu__container {
+  background: #1f2937;
+  border-radius: 6px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Styling untuk overlay controls */
+#overlay-controls {
+  z-index: 10;
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+#overlay-controls button {
+  outline: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+
+#play-overlay-btn i {
+  font-size: 3.5rem;
+  filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.5));
+}
+
+#backward-btn i, #forward-btn i {
+  font-size: 2rem;
+  filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.5));
+}
+
+#overlay-controls:hover {
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+#overlay-controls button:hover {
+  transform: scale(1.15);
+  background-color: rgba(59, 130, 246, 0.3);
+}
+
+#play-overlay-btn:hover i {
+  color: #60a5fa;
+}
+
+#backward-btn:hover i, #forward-btn:hover i {
+  color: #60a5fa;
+}
+
+/* Custom glow effect */
+@keyframes glow {
+  0% {
+    box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.8);
+  }
+  100% {
+    box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+  }
+}
+
+#overlay-controls button {
+  animation: glow 2s infinite ease-in-out;
+}
