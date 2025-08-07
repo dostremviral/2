@@ -8,7 +8,7 @@
     const pathParts = window.location.pathname.split('/');
     const adId = pathParts[pathParts.length - 1];
 
-    fetch('/ads.json')
+    fetch('ads.json')
       .then(response => response.json())
       .then(data => {
         const ad = data.find(item => item.id === adId);
