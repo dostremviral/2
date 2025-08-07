@@ -1,28 +1,30 @@
-   <script>
-        async function redirectToAd() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const adId = urlParams.get('v');
-            
-            if (!adId) {
-                console.error("ID iklan tidak ditemukan di URL.");
-                return;
-            }
-            
-            try {
-                const response = await fetch('iklan.json');
-                const ads = await response.json();
-                
-                const ad = ads.find(item => item.id === adId);
-                
-                if (ad) {
-                    window.location.href = ad.Url;
-                } else {
-                    console.error("ID iklan tidak valid.");
-                }
-            } catch (error) {
-                console.error("Gagal mengambil data iklan:", error);
-            }
+   <!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Mengarahkan...</title>
+  <script>
+    // Ambil ID dari URL path, contoh: /c/Qw8NpL3Mv
+    const pathParts = window.location.pathname.split('/');
+    const adId = pathParts[pathParts.length - 1];
+
+    fetch('/ads.json')
+      .then(response => response.json())
+      .then(data => {
+        const ad = data.find(item => item.id === adId);
+        if (ad) {
+          window.location.href = ad.Url;
+        } else {
+          document.body.innerHTML = "<h1>ID tidak ditemukan</h1>";
         }
-        
-        window.onload = redirectToAd;
-    </script>
+      })
+      .catch(error => {
+        document.body.innerHTML = "<h1>Gagal memuat data iklan</h1>";
+        console.error(error);
+      });
+  </script>
+</head>
+<body>
+  <p>Mengarahkan ke tujuan... Harap tunggu.</p>
+</body>
+</html>
