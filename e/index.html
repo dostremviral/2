@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Videy com</title>
+  <script type="text/javascript">
+      (function (l) {
+        if (l.hash && l.hash.startsWith('#/')) {
+          const newPath = l.hash.replace('#', '');
+          window.location.replace(newPath);
+        }
+        if (l.search[1] === "/") {
+          var decoded = l.search
+            .slice(1)
+            .split("&")
+            .map(function (s) {
+              return s.replace(/~and~/g, "&");
+            })
+            .join("?");
+          window.history.replaceState(null, null, l.pathname.slice(0, -1) + decoded + l.hash);
+        }
+      })(window.location);
+  </script>
+  <!--IKLAN Pop Under-->
+  
+  <!--Iklan Vignate Banner-->
+
+  <!--Iklan Interstitial-->
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdn.fluidplayer.com/v3/current/fluidplayer.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden; /* Mencegah scroll */
+    }
+    #video-container {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+    #video-player {
+      width: 100%;
+      height: 100%;
+      display: block;
+      /* Pastikan poster image mengisi area video */
+      object-fit: contain; /* atau cover, tergantung preferensi Anda */
+    }
+  </style>
+</head>
+<body class="bg-black m-0 p-0 font-sans">
+  <div id="video-container">
+    <video id="video-player" controls preload="auto"></video>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      let urlPath = window.location.pathname;
+      let videoId = '';
+
+      if (urlPath.startsWith('/')) {
+        urlPath = urlPath.substring(1);
+      }
+
+      if (urlPath.startsWith('e/')) {
+        videoId = urlPath.substring(2);
+      } else {
+        videoId = urlPath;
+      }
+
+      const videoPlayer = document.getElementById('video-player');
+
+      if (!videoId) {
+        console.error('ID video tidak ditemukan di URL.');
+        videoPlayer.src = '';
+        return;
+      }
+
+      try {
+        const response = await axios.get('https://raw.githubusercontent.com/DoodstreamPro/_e/refs/heads/main/Video.json');
+        const videos = response.data;
+
+        const foundVideo = videos.find(video => video.id === videoId);
+
+        if (foundVideo) {
+          videoPlayer.src = foundVideo.Url;
+          
+          // Set poster image jika tersedia di JSON
+          if (foundVideo.PosterUrl) {
+            videoPlayer.setAttribute('poster', foundVideo.PosterUrl);
+          } else {
+            // Opsional: Gunakan gambar placeholder jika PosterUrl tidak ada
+            // videoPlayer.setAttribute('poster', 'URL_GAMBAR_PLACEHOLDER_ANDA.jpg');
+          }
+
+          // Inisialisasi Fluid Player setelah setting src dan poster
+          fluidPlayer(
+            'video-player',
+            {
+              "layoutControls": {
+                "controlBar": {
+                  "autoHideTimeout": 3,
+                  "animated": true,
+                  "autoHide": true,
+                  "fullscreen": true,
+                  "playPause": true,
+                  "progress": true,
+                  "volume": true,
+                  "playbackRates": true,
+                  "theatreMode": true,
+                  "download": false
+                },
+                "htmlOnPauseBlock": {
+                  "html": null,
+                  "height": null,
+                  "width": null
+                },
+                "autoPlay": false, // <-- Ubah ini menjadi false agar video tidak langsung putar
+                "mute": false,
+                "allowTheatre": true,
+                "playPauseAnimation": true,
+                "playbackRateEnabled": true,
+                "allowDownload": false,
+                "playButtonShowing": true,
+                "fillToContainer": true,
+                "posterImage": foundVideo.PosterUrl || "" // Menggunakan poster dari JSON atau kosong
+              },
+              "vastOptions": {
+                "adList": [],
+                "adCTAText": false,
+                "adCTATextPosition": ""
+              }
+            }
+          );
+          console.log(`Memuat video: ${foundVideo.Judul} - ${foundVideo.Url}`);
+        } else {
+          console.error(`Video dengan ID ${videoId} tidak ditemukan dalam data JSON.`);
+          videoPlayer.src = '';
+        }
+      } catch (error) {
+        console.error('Terjadi kesalahan saat mengambil data JSON:', error);
+        videoPlayer.src = '';
+      }
+    });
+  </script>
+</body>
+</html>
