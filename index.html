@@ -46,6 +46,8 @@
       justify-content: center;
       align-items: center;
       margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 10px;
     }
     button {
       background-color: #4CAF50;
@@ -55,34 +57,16 @@
       font-size: 16px;
       border-radius: 5px;
       cursor: pointer;
-      margin: 0 5px;
       transition: background-color 0.3s;
     }
-    button:hover {
-      background-color: #45a049;
-    }
-    button.pause {
-      background-color: #f44336;
-    }
-    button.pause:hover {
-      background-color: #da190b;
-    }
-    .fullscreen-btn {
-      background-color: #2196F3;
-    }
-    .fullscreen-btn:hover {
-      background-color: #0b7dda;
-    }
-    p {
-      color: #aaa;
-    }
-    /* Hilangkan default kontrol browser */
-    video::-webkit-media-controls {
-      display: none !important;
-    }
-    video::-webkit-media-controls-enclosure {
-      display: none !important;
-    }
+    button:hover { background-color: #45a049; }
+    button.pause { background-color: #f44336; }
+    button.pause:hover { background-color: #da190b; }
+    .fullscreen-btn { background-color: #2196F3; }
+    .fullscreen-btn:hover { background-color: #0b7dda; }
+    p { color: #aaa; }
+    video::-webkit-media-controls { display: none !important; }
+    video::-webkit-media-controls-enclosure { display: none !important; }
   </style>
 </head>
 <body>
@@ -101,15 +85,15 @@
     document.addEventListener('DOMContentLoaded', async () => {
       let videoId = "";
 
-// 1. Cek query param ?v=
-const urlParams = new URLSearchParams(window.location.search);
-if (urlParams.has("v")) {
-  videoId = urlParams.get("v");
-} else {
-  // 2. Kalau ga ada ?v=, ambil dari path /e/ID atau /ID
-  let pathParts = window.location.pathname.split("/");
-  videoId = pathParts.pop() || pathParts.pop(); // ambil terakhir
-}
+      // 1. Ambil dari query ?v=
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has("v")) {
+        videoId = urlParams.get("v");
+      } else {
+        // 2. Ambil dari path (contoh: /e/ID atau /ID)
+        let pathParts = window.location.pathname.split("/");
+        videoId = pathParts.pop() || pathParts.pop(); // ambil terakhir
+      }
 
       const videoPlayer = document.getElementById('video-player');
       const playBtn = document.getElementById('playBtn');
@@ -125,7 +109,8 @@ if (urlParams.has("v")) {
       }
 
       try {
-        const response = await axios.get('https://raw.githubusercontent.com/DoodstreamPro/_e/refs/heads/main/Video.json');
+        // ✅ pastikan link raw JSON benar
+        const response = await axios.get('https://raw.githubusercontent.com/DoodstreamPro/_e/main/Video.json');
         const videos = response.data;
 
         const foundVideo = videos.find(video => video.id === videoId);
@@ -139,7 +124,7 @@ if (urlParams.has("v")) {
             videoPlayer.setAttribute('poster', foundVideo.PosterUrl);
           }
 
-          // FluidPlayer
+          // Aktifkan FluidPlayer
           const fluidInstance = fluidPlayer(
             'video-player',
             {
@@ -169,7 +154,7 @@ if (urlParams.has("v")) {
             }
           );
 
-          // Integrasi tombol custom
+          // Tombol manual
           playBtn.addEventListener('click', () => fluidInstance.play());
           pauseBtn.addEventListener('click', () => fluidInstance.pause());
           fullscreenBtn.addEventListener('click', () => {
