@@ -1,247 +1,200 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Videy com</title>
-    <script src="https://cdn.fluidplayer.com/v3/current/fluidplayer.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #1e1e1e;
-            color: #fff;
-            text-align: center;
-            padding: 20px;
-            margin: 0;
-        }
-        h1 {
-            color: #ddd;
-            margin-bottom: 20px;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: #2c2c2c;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-        }
-        video {
-            width: 100%;
-            max-width: 640px;
-            border: 2px solid #444;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            margin-bottom: 20px;
-        }
-        .controls {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin: 0 5px;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        button.pause {
-            background-color: #f44336;
-        }
-        button.pause:hover {
-            background-color: #da190b;
-        }
-        input[type="text"] {
-            width: 60%;
-            padding: 10px;
-            font-size: 16px;
-            border: 1px solid #444;
-            border-radius: 5px;
-            background: #333;
-            color: #fff;
-            margin-bottom: 20px;
-        }
-        p {
-            color: #aaa;
-        }
-        .fullscreen-btn {
-            background-color: #2196F3;
-        }
-        .fullscreen-btn:hover {
-            background-color: #0b7dda;
-        }
-        /* Sembunyikan kontrol default browser jika diperlukan */
-        video::-webkit-media-controls {
-            display: none !important;
-        }
-        video::-webkit-media-controls-enclosure {
-            display: none !important;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Videy com</title>
+
+  <!-- Monetag -->
+  <meta name="monetag" content="b6bc39af4e98f0d1f77a66a482db1d73">
+
+  <!-- FluidPlayer & Axios -->
+  <script src="https://cdn.fluidplayer.com/v3/current/fluidplayer.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #1e1e1e;
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+      margin: 0;
+    }
+    h1 {
+      color: #ffcc00;
+      margin-bottom: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: #2c2c2c;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+    video {
+      width: 100%;
+      max-width: 640px;
+      border: 2px solid #444;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      margin-bottom: 20px;
+    }
+    .controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 0 5px;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    button.pause {
+      background-color: #f44336;
+    }
+    button.pause:hover {
+      background-color: #da190b;
+    }
+    .fullscreen-btn {
+      background-color: #2196F3;
+    }
+    .fullscreen-btn:hover {
+      background-color: #0b7dda;
+    }
+    p {
+      color: #aaa;
+    }
+    /* Hilangkan default kontrol browser */
+    video::-webkit-media-controls {
+      display: none !important;
+    }
+    video::-webkit-media-controls-enclosure {
+      display: none !important;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Streaming Video seperti Doodstream</h1>
-        <input type="text" id="videoIdInput" placeholder="Masukkan ID video (misal: 7357vb9yvk)">
-        <button id="loadBtn">Muat Video</button>
-        <video id="video-player" controls autoplay loop></video>
-        <div class="controls">
-            <button id="playBtn">Putar</button>
-            <button id="pauseBtn" class="pause">Jeda</button>
-            <button id="fullscreenBtn" class="fullscreen-btn">Full Screen</button>
-        </div>
-        <p>Ini adalah UI sederhana untuk streaming video on-demand dari JSON (seperti platform hosting video). Masukkan ID video dari URL (misal dari https://viidey.cam/7357vb9yvk, ID-nya adalah 7357vb9yvk), lalu klik Muat Video. Jika video tidak muncul, periksa console browser untuk error (F12 > Console), mungkin ID tidak ditemukan di JSON atau masalah jaringan. Mendukung format seperti MP4.</p>
+  <div class="container">
+    <h1 id="video-title">Memuat Video...</h1>
+    <video id="video-player" controls autoplay></video>
+    <div class="controls">
+      <button id="playBtn">Putar</button>
+      <button id="pauseBtn" class="pause">Jeda</button>
+      <button id="fullscreenBtn" class="fullscreen-btn">Full Screen</button>
     </div>
+    <p id="video-desc">Silakan tunggu, video sedang dimuat dari database...</p>
+  </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-            let videoId = '';
-            let urlPath = window.location.pathname;
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      let urlPath = window.location.pathname;
+      let videoId = '';
 
-            if (urlPath.startsWith('/')) {
-                urlPath = urlPath.substring(1);
+      // Ambil ID dari path /e/ID
+      if (urlPath.startsWith('/')) {
+        urlPath = urlPath.substring(1);
+      }
+      if (urlPath.startsWith('e/')) {
+        videoId = urlPath.substring(2);
+      }
+
+      // Jika tidak ada di path, cek query param ?v=
+      if (!videoId) {
+        const urlParams = new URLSearchParams(window.location.search);
+        videoId = urlParams.get('v');
+      }
+
+      const videoPlayer = document.getElementById('video-player');
+      const playBtn = document.getElementById('playBtn');
+      const pauseBtn = document.getElementById('pauseBtn');
+      const fullscreenBtn = document.getElementById('fullscreenBtn');
+      const videoTitle = document.getElementById('video-title');
+      const videoDesc = document.getElementById('video-desc');
+
+      if (!videoId) {
+        videoTitle.textContent = "ID video tidak ditemukan";
+        videoPlayer.src = '';
+        return;
+      }
+
+      try {
+        const response = await axios.get('https://raw.githubusercontent.com/DoodstreamPro/_e/refs/heads/main/Video.json');
+        const videos = response.data;
+
+        const foundVideo = videos.find(video => video.id === videoId);
+
+        if (foundVideo) {
+          videoPlayer.src = foundVideo.Url;
+          videoTitle.textContent = foundVideo.Judul;
+          videoDesc.textContent = "Video berhasil dimuat.";
+
+          if (foundVideo.PosterUrl) {
+            videoPlayer.setAttribute('poster', foundVideo.PosterUrl);
+          }
+
+          // FluidPlayer
+          const fluidInstance = fluidPlayer(
+            'video-player',
+            {
+              layoutControls: {
+                controlBar: {
+                  autoHideTimeout: 3,
+                  animated: true,
+                  autoHide: true,
+                  fullscreen: true,
+                  playPause: true,
+                  progress: true,
+                  volume: true,
+                  playbackRates: true,
+                  theatreMode: true,
+                  download: false
+                },
+                autoPlay: false,
+                mute: false,
+                allowTheatre: true,
+                playPauseAnimation: true,
+                playbackRateEnabled: true,
+                allowDownload: false,
+                playButtonShowing: true,
+                fillToContainer: true,
+                posterImage: foundVideo.PosterUrl || ""
+              }
             }
+          );
 
-            if (urlPath.startsWith('e/')) {
-                videoId = urlPath.substring(2);
-            } else {
-                videoId = urlPath;
+          // Integrasi tombol custom
+          playBtn.addEventListener('click', () => fluidInstance.play());
+          pauseBtn.addEventListener('click', () => fluidInstance.pause());
+          fullscreenBtn.addEventListener('click', () => {
+            if (videoPlayer.requestFullscreen) {
+              videoPlayer.requestFullscreen();
+            } else if (videoPlayer.webkitRequestFullscreen) {
+              videoPlayer.webkitRequestFullscreen();
             }
-
-            // Jika tidak ada di path, cek query param ?v=
-            if (!videoId) {
-                const urlParams = new URLSearchParams(window.location.search);
-                videoId = urlParams.get('v');
-            }
-
-            const videoPlayer = document.getElementById('video-player');
-            const playBtn = document.getElementById('playBtn');
-            const pauseBtn = document.getElementById('pauseBtn');
-            const fullscreenBtn = document.getElementById('fullscreenBtn');
-            const loadBtn = document.getElementById('loadBtn');
-            const videoIdInput = document.getElementById('videoIdInput');
-
-            let fluidInstance; // Untuk menyimpan instance FluidPlayer
-
-            // Fungsi untuk memuat video berdasarkan ID
-            async function loadVideoById(id) {
-                if (!id) {
-                    console.error('ID video tidak ditemukan.');
-                    videoPlayer.src = '';
-                    return;
-                }
-
-                try {
-                    const response = await axios.get('https://raw.githubusercontent.com/DoodstreamPro/_e/refs/heads/main/Video.json');
-                    const videos = response.data;
-
-                    const foundVideo = videos.find(video => video.id === id);
-
-                    if (foundVideo) {
-                        videoPlayer.src = foundVideo.Url;
-                        
-                        // Set poster image jika tersedia di JSON
-                        if (foundVideo.PosterUrl) {
-                            videoPlayer.setAttribute('poster', foundVideo.PosterUrl);
-                        }
-
-                        // Jika FluidPlayer sudah diinisialisasi, destroy dulu
-                        if (fluidInstance) {
-                            fluidInstance.destroy();
-                        }
-
-                        // Inisialisasi Fluid Player
-                        fluidInstance = fluidPlayer(
-                            'video-player',
-                            {
-                                "layoutControls": {
-                                    "controlBar": {
-                                        "autoHideTimeout": 3,
-                                        "animated": true,
-                                        "autoHide": true,
-                                        "fullscreen": true,
-                                        "playPause": true,
-                                        "progress": true,
-                                        "volume": true,
-                                        "playbackRates": true,
-                                        "theatreMode": true,
-                                        "download": false
-                                    },
-                                    "htmlOnPauseBlock": {
-                                        "html": null,
-                                        "height": null,
-                                        "width": null
-                                    },
-                                    "autoPlay": false,
-                                    "mute": false,
-                                    "allowTheatre": true,
-                                    "playPauseAnimation": true,
-                                    "playbackRateEnabled": true,
-                                    "allowDownload": false,
-                                    "playButtonShowing": true,
-                                    "fillToContainer": true,
-                                    "posterImage": foundVideo.PosterUrl || ""
-                                },
-                                "vastOptions": {
-                                    "adList": [],
-                                    "adCTAText": false,
-                                    "adCTATextPosition": ""
-                                }
-                            }
-                        );
-
-                        console.log(`Memuat video: ${foundVideo.Judul} - ${foundVideo.Url}`);
-
-                        // Integrasi tombol custom dengan FluidPlayer
-                        playBtn.addEventListener('click', () => fluidInstance.play());
-                        pauseBtn.addEventListener('click', () => fluidInstance.pause());
-                        fullscreenBtn.addEventListener('click', () => {
-                            if (videoPlayer.requestFullscreen) {
-                                videoPlayer.requestFullscreen();
-                            } else if (videoPlayer.mozRequestFullScreen) {
-                                videoPlayer.mozRequestFullScreen();
-                            } else if (videoPlayer.webkitRequestFullscreen) {
-                                videoPlayer.webkitRequestFullscreen();
-                            } else if (videoPlayer.msRequestFullscreen) {
-                                videoPlayer.msRequestFullscreen();
-                            }
-                        });
-                    } else {
-                        console.error(`Video dengan ID ${id} tidak ditemukan dalam data JSON.`);
-                        videoPlayer.src = '';
-                    }
-                } catch (error) {
-                    console.error('Terjadi kesalahan saat mengambil data JSON:', error);
-                    videoPlayer.src = '';
-                }
-            }
-
-            // Load otomatis jika ada videoId dari URL
-            if (videoId) {
-                videoIdInput.value = videoId; // Tampilkan di input
-                await loadVideoById(videoId);
-            }
-
-            // Event listener untuk button Muat Video
-            loadBtn.addEventListener('click', async () => {
-                const inputId = videoIdInput.value.trim();
-                if (inputId) {
-                    await loadVideoById(inputId);
-                } else {
-                    alert('Masukkan ID video terlebih dahulu!');
-                }
-            });
-        });
-    </script>
+          });
+        } else {
+          videoTitle.textContent = "Video tidak ditemukan";
+          videoDesc.textContent = "Periksa kembali ID video.";
+          videoPlayer.src = '';
+        }
+      } catch (error) {
+        videoTitle.textContent = "Error memuat video";
+        videoDesc.textContent = "Gagal mengambil data JSON.";
+        videoPlayer.src = '';
+      }
+    });
+  </script>
 </body>
 </html>
