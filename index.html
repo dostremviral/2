@@ -116,7 +116,11 @@
   <main class="pt-20 pb-10"> <!-- Padding top untuk header fixed -->
     <div id="video-container" class="mt-4">
       <div class="loading-spinner" id="loading-spinner"></div> <!-- Spinner loading -->
-
+      <div class="overlay">
+        <button class="bg-red-600 text-white px-6 py-3 rounded-full hover:bg-red-700 transition flex items-center">
+          <i class="fas fa-play mr-2"></i> Play Now
+        </button>
+      </div>
       <video id="video-player" controls preload="auto"></video>
     </div>
     <div id="error-message" class="max-w-7xl mx-auto px-6"></div>
@@ -132,7 +136,7 @@
           <span class="ml-2 text-white">4.5 / 5</span>
         </div>
         <span class="text-gray-400 mr-4"><i class="fas fa-eye mr-1"></i> 1.2K Views</span>
-        <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mr-2"><i class="fas fa-share-alt mr-1"></i> Share</button>
+        <button id="share-button" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mr-2"><i class="fas fa-share-alt mr-1"></i> Share</button>
         <button class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"><i class="fas fa-thumbs-up mr-1"></i> Like</button>
       </div>
 
@@ -179,6 +183,7 @@
       const videoDescription = document.getElementById('video-description');
       const loadingSpinner = document.getElementById('loading-spinner');
       const errorMessage = document.getElementById('error-message');
+      const shareButton = document.getElementById('share-button');
 
       if (!videoId) {
         console.error('ID video tidak ditemukan di URL.');
@@ -277,6 +282,23 @@
       } finally {
         loadingSpinner.style.display = 'none'; // Sembunyikan spinner setelah selesai
       }
+
+      // Fungsi untuk tombol Share
+      shareButton.addEventListener('click', async () => {
+        const currentUrl = window.location.href;
+        try {
+          await navigator.clipboard.writeText(currentUrl);
+          // Berikan umpan balik: Ubah teks tombol sementara
+          const originalText = shareButton.innerHTML;
+          shareButton.innerHTML = '<i class="fas fa-check mr-1"></i> Copied!';
+          setTimeout(() => {
+            shareButton.innerHTML = originalText;
+          }, 2000);
+        } catch (err) {
+          console.error('Gagal menyalin link:', err);
+          alert('Gagal menyalin link. Silakan salin secara manual: ' + currentUrl);
+        }
+      });
     });
   </script>
 </body>
