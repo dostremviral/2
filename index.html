@@ -1,213 +1,160 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="monetag" content="b6bc39af4e98f0d1f77a66a482db1d73">
+  
   <title>Videy com</title>
+  <script type="text/javascript">
+      (function (l) {
+        if (l.hash && l.hash.startsWith('#/')) {
+          const newPath = l.hash.replace('#', '');
+          window.location.replace(newPath);
+        }
+        if (l.search[1] === "/") {
+          var decoded = l.search
+            .slice(1)
+            .split("&")
+            .map(function (s) {
+              return s.replace(/~and~/g, "&");
+            })
+            .join("?");
+          window.history.replaceState(null, null, l.pathname.slice(0, -1) + decoded + l.hash);
+        }
+      })(window.location);
+  </script>
+  <!--IKLAN Pop Under-->
 
-  <!-- Monetag -->
-  <meta name="monetag" content="b6bc39af4e98f0d1f77a66a482db1d73">
+  <!--Iklan Vignate Banner-->
 
-  <!-- FluidPlayer & Axios -->
+  <!--Iklan Interstitial-->
+
+
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <script src="https://cdn.fluidplayer.com/v3/current/fluidplayer.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #1e1e1e;
-      color: #fff;
-      text-align: center;
-      padding: 20px;
+    html, body {
+      height: 100%;
       margin: 0;
+      padding: 0;
+      overflow: hidden; /* Mencegah scroll */
     }
-    h1 {
-      color: #ffcc00;
-      margin-bottom: 20px;
-    }
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-      background: #2c2c2c;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-    }
-    video {
-      width: 100%;
-      max-width: 640px;
-      border: 2px solid #444;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-      margin-bottom: 20px;
-    }
-    .controls {
+    #video-container {
+      width: 100vw;
+      height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-      gap: 10px;
+      position: relative;
     }
-    button {
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      font-size: 16px;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s;
+    #video-player {
+      width: 100%;
+      height: 100%;
+      display: block;
+      /* Pastikan poster image mengisi area video */
+      object-fit: contain; /* atau cover, tergantung preferensi Anda */
     }
-    button:hover { background-color: #45a049; }
-    button.pause { background-color: #f44336; }
-    button.pause:hover { background-color: #da190b; }
-    .fullscreen-btn { background-color: #2196F3; }
-    .fullscreen-btn:hover { background-color: #0b7dda; }
-    p { color: #aaa; }
-    video::-webkit-media-controls { display: none !important; }
-    video::-webkit-media-controls-enclosure { display: none !important; }
   </style>
 </head>
-<body>
-  <div class="container">
-    <h1 id="video-title">Memuat Video...</h1>
-    <video id="video-player" controls autoplay></video>
-    <div class="controls">
-      <button id="playBtn">Putar</button>
-      <button id="pauseBtn" class="pause">Jeda</button>
-      <button id="fullscreenBtn" class="fullscreen-btn">Full Screen</button>
-    </div>
-    <p id="video-desc">Silakan tunggu, video sedang dimuat dari database...</p>
+<body class="bg-black m-0 p-0 font-sans">
+  <div id="video-container">
+    <video id="video-player" controls preload="auto"></video>
   </div>
 
   <script>
-    const JSON_URL = 'https://raw.githubusercontent.com/DoodstreamPro/_e/refs/heads/main/Video.json';
+    document.addEventListener('DOMContentLoaded', async () => {
+      let urlPath = window.location.pathname;
+      let videoId = '';
 
-// Ambil video ID dari query parameter
-const urlParams = new URLSearchParams(window.location.search);
-const videoId = urlParams.get('v');
-
-const videoPlayer = document.getElementById('video-player');
-const videoTitle = document.getElementById('video-title');
-const overlayControls = document.getElementById('overlay-controls');
-const playOverlayBtn = document.getElementById('play-overlay-btn');
-const backwardBtn = document.getElementById('backward-btn');
-const forwardBtn = document.getElementById('forward-btn');
-const videoContainer = document.getElementById('video-container');
-
-let hideControlsTimeout;
-
-// Fungsi untuk menampilkan overlay controls sementara
-function showOverlayControls() {
-  clearTimeout(hideControlsTimeout);
-  overlayControls.style.opacity = '0.9';
-  overlayControls.style.pointerEvents = 'auto';
-  if (player.playing) {
-    hideControlsTimeout = setTimeout(() => {
-      overlayControls.style.opacity = '0';
-      overlayControls.style.pointerEvents = 'none';
-    }, 3000); // Sembunyikan overlay setelah 3 detik
-  }
-}
-
-// Inisialisasi Plyr
-const player = new Plyr(videoPlayer, {
-  controls: ['play', 'progress', 'current-time', 'duration', 'mute', 'volume', 'settings', 'fullscreen'],
-  settings: ['speed'],
-  speed: { selected: 1, options: [0.5, 1, 1.5, 2] },
-  autoplay: false,
-  loop: { active: true },
-  muted: true
-});
-
-// Pastikan Plyr controls selalu aktif
-player.on('ready', () => {
-  const plyrControls = document.querySelector('.plyr__controls');
-  if (plyrControls) {
-    plyrControls.style.display = 'flex';
-  }
-  showOverlayControls(); // Tampilkan overlay saat video dimuat
-});
-
-// Toggle overlay controls saat tombol play di tengah diklik
-playOverlayBtn.addEventListener('click', (e) => {
-  e.stopPropagation();
-  player.togglePlay();
-  if (player.playing) {
-    showOverlayControls(); // Mulai timer untuk menyembunyikan overlay
-  } else {
-    showOverlayControls(); // Tampilkan overlay tanpa timer saat pause
-    clearTimeout(hideControlsTimeout); // Batalkan timer
-  }
-});
-
-// Toggle overlay controls saat video diklik
-videoContainer.addEventListener('click', (e) => {
-  if (e.target.closest('#overlay-controls')) return;
-  showOverlayControls();
-});
-
-// Update ikon play/pause saat video diputar atau dijeda
-player.on('play', () => {
-  playOverlayBtn.querySelector('i').classList.remove('fa-play');
-  playOverlayBtn.querySelector('i').classList.add('fa-pause');
-  showOverlayControls(); // Mulai timer untuk menyembunyikan overlay
-});
-
-player.on('pause', () => {
-  playOverlayBtn.querySelector('i').classList.remove('fa-pause');
-  playOverlayBtn.querySelector('i').classList.add('fa-play');
-  showOverlayControls(); // Tampilkan overlay tanpa timer
-  clearTimeout(hideControlsTimeout); // Batalkan timer
-});
-
-// Fungsi untuk mendeteksi double-click
-let lastClickTimeBackward = 0;
-let lastClickTimeForward = 0;
-const DOUBLE_CLICK_THRESHOLD = 300; // Milidetik untuk mendeteksi double-click
-
-backwardBtn.addEventListener('click', (e) => {
-  e.stopPropagation();
-  const currentTime = Date.now();
-  if (currentTime - lastClickTimeBackward < DOUBLE_CLICK_THRESHOLD) {
-    player.currentTime = Math.max(0, player.currentTime - 10);
-    showOverlayControls(); // Tampilkan overlay setelah skip
-  }
-  lastClickTimeBackward = currentTime;
-});
-
-forwardBtn.addEventListener('click', (e) => {
-  e.stopPropagation();
-  const currentTime = Date.now();
-  if (currentTime - lastClickTimeForward < DOUBLE_CLICK_THRESHOLD) {
-    player.currentTime = Math.min(player.duration, player.currentTime + 10);
-    showOverlayControls(); // Tampilkan overlay setelah skip
-  }
-  lastClickTimeForward = currentTime;
-});
-
-// Ambil data JSON
-if (videoId) {
-  fetch(JSON_URL)
-    .then(response => response.json())
-    .then(data => {
-      const video = data.find(v => v.id === videoId);
-      if (video) {
-        videoPlayer.src = video.Url;
-        videoTitle.textContent = video.Judul;
-      } else {
-        console.error('video dengan id tersebut tidak di temukan');
-      
+      if (urlPath.startsWith('/')) {
+        urlPath = urlPath.substring(1);
       }
-    })
-    .catch(error => {
-      console.error('Error fetching video data:', error);
-      
+
+      if (urlPath.startsWith('e/')) {
+        videoId = urlPath.substring(2);
+      } else {
+        videoId = urlPath;
+      }
+
+      const videoPlayer = document.getElementById('video-player');
+
+      if (!videoId) {
+        console.error('ID video tidak ditemukan di URL.');
+        videoPlayer.src = '';
+        return;
+      }
+
+      try {
+        const response = await axios.get('https://raw.githubusercontent.com/DoodstreamPro/_e/refs/heads/main/Video.json');
+        const videos = response.data;
+
+        const foundVideo = videos.find(video => video.id === videoId);
+
+        if (foundVideo) {
+          videoPlayer.src = foundVideo.Url;
+          
+          // Set poster image jika tersedia di JSON
+          if (foundVideo.PosterUrl) {
+            videoPlayer.setAttribute('poster', foundVideo.PosterUrl);
+          } else {
+            // Opsional: Gunakan gambar placeholder jika PosterUrl tidak ada
+            // videoPlayer.setAttribute('poster', 'URL_GAMBAR_PLACEHOLDER_ANDA.jpg');
+          }
+
+          // Inisialisasi Fluid Player setelah setting src dan poster
+          fluidPlayer(
+            'video-player',
+            {
+              "layoutControls": {
+                "controlBar": {
+                  "autoHideTimeout": 3,
+                  "animated": true,
+                  "autoHide": true,
+                  "fullscreen": true,
+                  "playPause": true,
+                  "progress": true,
+                  "volume": true,
+                  "playbackRates": true,
+                  "theatreMode": true,
+                  "download": false
+                },
+                "htmlOnPauseBlock": {
+                  "html": null,
+                  "height": null,
+                  "width": null
+                },
+                "autoPlay": false, // <-- Ubah ini menjadi false agar video tidak langsung putar
+                "mute": false,
+                "allowTheatre": true,
+                "playPauseAnimation": true,
+                "playbackRateEnabled": true,
+                "allowDownload": false,
+                "playButtonShowing": true,
+                "fillToContainer": true,
+                "posterImage": foundVideo.PosterUrl || "" // Menggunakan poster dari JSON atau kosong
+              },
+              "vastOptions": {
+                "adList": [],
+                "adCTAText": false,
+                "adCTATextPosition": ""
+              }
+            }
+          );
+          console.log(`Memuat video: ${foundVideo.Judul} - ${foundVideo.Url}`);
+        } else {
+          console.error(`Video dengan ID ${videoId} tidak ditemukan dalam data JSON.`);
+          videoPlayer.src = '';
+        }
+      } catch (error) {
+        console.error('Terjadi kesalahan saat mengambil data JSON:', error);
+        videoPlayer.src = '';
+      }
     });
-} else {
-  console.error('Error tidak di temukan id');      
-}
   </script>
 </body>
 </html>
