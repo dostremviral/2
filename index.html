@@ -85,15 +85,9 @@
     document.addEventListener('DOMContentLoaded', async () => {
       let videoId = "";
 
-      // 1. Ambil dari query ?v=
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.has("v")) {
-        videoId = urlParams.get("v");
-      } else {
-        // 2. Ambil dari path (contoh: /e/ID atau /ID)
-        let pathParts = window.location.pathname.split("/");
-        videoId = pathParts.pop() || pathParts.pop(); // ambil terakhir
-      }
+      // Ambil ID terakhir dari path
+      let pathParts = window.location.pathname.split("/");
+      videoId = pathParts.pop() || pathParts.pop(); // ambil paling belakang
 
       const videoPlayer = document.getElementById('video-player');
       const playBtn = document.getElementById('playBtn');
