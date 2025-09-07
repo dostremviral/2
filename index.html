@@ -45,52 +45,46 @@
     </div>
   </main>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', async () => {
-      let urlPath = window.location.pathname;
-      let videoId = '';
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  let urlPath = window.location.pathname;
+  let videoId = "";
 
-      if (urlPath.startsWith('/')) {
-        urlPath = urlPath.substring(1);
+  if (urlPath.startsWith("/e/")) {
+    videoId = urlPath.replace("/e/", "");
+  } else {
+    videoId = urlPath.replace("/", "");
+  }
+
+  const videoPlayer = document.getElementById('video-player');
+  const titleEl = document.getElementById('video-title');
+  const durationEl = document.getElementById('video-duration');
+  const sizeEl = document.getElementById('video-size');
+  const dateEl = document.getElementById('video-date');
+
+  try {
+    const response = await axios.get('https://raw.githubusercontent.com/DoodstreamPro/_e/refs/heads/main/Video.json');
+    const videos = response.data;
+    const foundVideo = videos.find(video => video.id === videoId);
+
+    if (foundVideo) {
+      videoPlayer.src = foundVideo.Url;
+      if (foundVideo.PosterUrl) {
+        videoPlayer.setAttribute("poster", foundVideo.PosterUrl);
       }
-      if (urlPath.startsWith('e/')) {
-        videoId = urlPath.substring(2);
-      } else {
-        videoId = urlPath;
-      }
 
-      const videoPlayer = document.getElementById('video-player');
-      const titleEl = document.getElementById('video-title');
-      const durationEl = document.getElementById('video-duration');
-      const sizeEl = document.getElementById('video-size');
-      const dateEl = document.getElementById('video-date');
-
-      try {
-        const response = await axios.get('https://raw.githubusercontent.com/DoodstreamPro/_e/refs/heads/main/Video.json');
-        const videos = response.data;
-        const foundVideo = videos.find(video => video.id === videoId);
-
-        if (foundVideo) {
-          videoPlayer.src = foundVideo.Url;
-
-          // isi konten sesuai JSON
-          titleEl.textContent = foundVideo.Judul || "Tanpa Judul";
-          durationEl.textContent = foundVideo.Duration || "00:00";
-          sizeEl.textContent = foundVideo.Size || "0MB";
-          dateEl.textContent = foundVideo.Tanggal || "-";
-
-          // poster (jika ada)
-          if (foundVideo.PosterUrl) {
-            videoPlayer.setAttribute("poster", foundVideo.PosterUrl);
-          }
-        } else {
-          titleEl.textContent = "Video tidak ditemukan.";
-        }
-      } catch (err) {
-        console.error("Error fetch JSON:", err);
-        titleEl.textContent = "Gagal memuat data video.";
-      }
-    });
-  </script>
+      titleEl.textContent = foundVideo.Judul || "Tanpa Judul";
+      durationEl.textContent = foundVideo.Duration || "00:00";
+      sizeEl.textContent = foundVideo.Size || "0MB";
+      dateEl.textContent = foundVideo.Tanggal || "-";
+    } else {
+      titleEl.textContent = "Video tidak ditemukan (ID tidak cocok)";
+    }
+  } catch (err) {
+    console.error("Error fetch JSON:", err);
+    titleEl.textContent = "Gagal memuat data video.";
+  }
+});
+</script>
 </body>
 </html>
