@@ -93,6 +93,12 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+    #error-message {
+      display: none;
+      color: red;
+      text-align: center;
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body class="bg-gradient-to-b from-black to-gray-900 text-white font-sans">
@@ -117,6 +123,7 @@
       </div>
       <video id="video-player" controls preload="auto"></video>
     </div>
+    <div id="error-message" class="max-w-7xl mx-auto px-6"></div>
 
     <section class="max-w-7xl mx-auto mt-8 px-6">
       <h2 id="video-title" class="text-3xl font-bold mb-4">Judul Video</h2>
@@ -175,17 +182,22 @@
       const videoTitle = document.getElementById('video-title');
       const videoDescription = document.getElementById('video-description');
       const loadingSpinner = document.getElementById('loading-spinner');
+      const errorMessage = document.getElementById('error-message');
 
       if (!videoId) {
         console.error('ID video tidak ditemukan di URL.');
         videoPlayer.src = '';
+        errorMessage.textContent = 'ID video tidak ditemukan di URL.';
+        errorMessage.style.display = 'block';
         return;
       }
 
       loadingSpinner.style.display = 'block'; // Tampilkan spinner saat loading
 
       try {
-        const response = await axios.get('https://raw.githubusercontent.com/DoodstreamPro/_e/refs/heads/main/Video.json');
+        const response = await axios.get('https://raw.githubusercontent.com/DoodstreamPro/_e/refs/heads/main/Video.json', {
+          timeout: 10000 // Tambah timeout untuk prevent hang
+        });
         const videos = response.data;
 
         const foundVideo = videos.find(video => video.id === videoId);
@@ -202,8 +214,8 @@
           videoTitle.textContent = foundVideo.Judul || 'Untitled Video';
           videoDescription.textContent = foundVideo.Description || 'No description available.';
 
-          // Inisialisasi Fluid Player
-          fluidPlayer(
+          // Inisialisasi Fluid Player setelah src set
+          const player = fluidPlayer(
             'video-player',
             {
               "layoutControls": {
@@ -231,7 +243,7 @@
                 "playbackRateEnabled": true,
                 "allowDownload": false,
                 "playButtonShowing": true,
-                "fillToContainer": false, // Ubah ke false agar tidak full container
+                "fillToContainer": true, // Ubah kembali ke true untuk fill container
                 "posterImage": foundVideo.PosterUrl || ""
               },
               "vastOptions": {
@@ -241,14 +253,31 @@
               }
             }
           );
+
+          // Tambah event listener untuk error playback
+          videoPlayer.addEventListener('error', () => {
+            console.error('Error playing video');
+            errorMessage.textContent = 'Error memutar video. Periksa koneksi atau format video.';
+            errorMessage.style.display = 'block';
+          });
+
+          // Force load
+          player.on('loadedmetadata', () => {
+            console.log('Video metadata loaded');
+          });
+
           console.log(`Memuat video: ${foundVideo.Judul} - ${foundVideo.Url}`);
         } else {
           console.error(`Video dengan ID ${videoId} tidak ditemukan dalam data JSON.`);
           videoPlayer.src = '';
+          errorMessage.textContent = `Video dengan ID ${videoId} tidak ditemukan.`;
+          errorMessage.style.display = 'block';
         }
       } catch (error) {
         console.error('Terjadi kesalahan saat mengambil data JSON:', error);
         videoPlayer.src = '';
+        errorMessage.textContent = 'Error mengambil data video. Periksa URL JSON atau koneksi internet.';
+        errorMessage.style.display = 'block';
       } finally {
         loadingSpinner.style.display = 'none'; // Sembunyikan spinner setelah selesai
       }
