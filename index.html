@@ -99,22 +99,17 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
-      let urlPath = window.location.pathname;
-      let videoId = '';
+      let videoId = "";
 
-      // Ambil ID dari path /e/ID
-      if (urlPath.startsWith('/')) {
-        urlPath = urlPath.substring(1);
-      }
-      if (urlPath.startsWith('e/')) {
-        videoId = urlPath.substring(2);
-      }
-
-      // Jika tidak ada di path, cek query param ?v=
-      if (!videoId) {
-        const urlParams = new URLSearchParams(window.location.search);
-        videoId = urlParams.get('v');
-      }
+// 1. Cek query param ?v=
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.has("v")) {
+  videoId = urlParams.get("v");
+} else {
+  // 2. Kalau ga ada ?v=, ambil dari path /e/ID atau /ID
+  let pathParts = window.location.pathname.split("/");
+  videoId = pathParts.pop() || pathParts.pop(); // ambil terakhir
+}
 
       const videoPlayer = document.getElementById('video-player');
       const playBtn = document.getElementById('playBtn');
