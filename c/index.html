@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Iklan Redirect</title>
 </head>
 <body>
@@ -10,43 +10,38 @@
   async function redirectToAd() {
     let adId = null;
 
-    // 1. Cek query string ?v=...
+    // 1) cek query string ?v=
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has("v")) {
-      adId = urlParams.get("v");
+    if (urlParams.has("v")) adId = urlParams.get("v");
+
+    // 2) kalau tidak ada, ambil dari path terakhir
+    if (!adId) {
+      const parts = window.location.pathname.split("/").filter(Boolean);
+      // contoh path: /repo/c/Ab3KpL2Rt  OR /c/Ab3KpL2Rt
+      const last = parts[parts.length - 1];
+      if (last && last.toLowerCase() !== "c") adId = last;
     }
 
-    // 2. Kalau tidak ada ?v=, cek path terakhir
     if (!adId) {
-      const pathParts = window.location.pathname.split("/").filter(Boolean);
-      const lastPart = pathParts[pathParts.length - 1];
-      
-      // pastikan bukan nama folder "c"
-      if (lastPart && lastPart.toLowerCase() !== "c") {
-        adId = lastPart;
-      }
-    }
-
-    // 3. Kalau tetap kosong, stop
-    if (!adId) {
-      console.error("ID iklan tidak ditemukan di URL.");
+      console.error("ID iklan tidak ditemukan");
       return;
     }
 
     try {
-      // Ambil JSON khusus folder c
-      const response = await fetch("iklan-c.json");
-      const ads = await response.json();
-
-      const ad = ads.find(item => item.id === adId);
-
-      if (ad) {
+      // gunakan path absolut supaya script tetap bekerja dari 404.html juga
+      const jsonPath = "/c/iklan-c.json";
+      const res = await fetch(jsonPath);
+      const ads = await res.json();
+      const ad = ads.find(x => x.id === adId);
+      if (ad && ad.Url) {
         window.location.href = ad.Url;
       } else {
-        console.error("ID iklan tidak valid:", adId);
+        console.error("ID tidak valid:", adId);
       }
-    } catch (error) {
-      console.error("Gagal mengambil data iklan:", error);
+    } catch (e) {
+      console.error("Gagal load iklan:", e);
+      // fallback: buka halaman folder dengan query param
+      location.href = "/c/?v=" + encodeURIComponent(adId);
     }
   }
 
