@@ -1,8 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iklan Redirect</title>
+</head>
+<body>
 <script>
   async function redirectToAd() {
-    // ambil path terakhir setelah /c/
-    const path = window.location.pathname.split("/").pop();
-    const adId = path || null;
+    // Cek apakah URL pakai query ?v= atau path langsung
+    let adId = null;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has("v")) {
+      adId = urlParams.get("v");
+    } else {
+      // Ambil ID dari path terakhir setelah /c/
+      const path = window.location.pathname.split("/").filter(Boolean);
+      adId = path[path.length - 1]; 
+    }
 
     if (!adId) {
       console.error("ID iklan tidak ditemukan di URL.");
@@ -10,7 +26,7 @@
     }
 
     try {
-      const response = await fetch('iklan-c.json');
+      const response = await fetch("iklan-c.json"); // JSON harus ada di folder c
       const ads = await response.json();
 
       const ad = ads.find(item => item.id === adId);
@@ -27,3 +43,5 @@
 
   window.onload = redirectToAd;
 </script>
+</body>
+</html>
