@@ -8,25 +8,34 @@
 <body>
 <script>
   async function redirectToAd() {
-    // Cek apakah URL pakai query ?v= atau path langsung
     let adId = null;
 
+    // 1. Cek query string ?v=...
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.has("v")) {
       adId = urlParams.get("v");
-    } else {
-      // Ambil ID dari path terakhir setelah /c/
-      const path = window.location.pathname.split("/").filter(Boolean);
-      adId = path[path.length - 1]; 
     }
 
+    // 2. Kalau tidak ada ?v=, cek path terakhir
+    if (!adId) {
+      const pathParts = window.location.pathname.split("/").filter(Boolean);
+      const lastPart = pathParts[pathParts.length - 1];
+      
+      // pastikan bukan nama folder "c"
+      if (lastPart && lastPart.toLowerCase() !== "c") {
+        adId = lastPart;
+      }
+    }
+
+    // 3. Kalau tetap kosong, stop
     if (!adId) {
       console.error("ID iklan tidak ditemukan di URL.");
       return;
     }
 
     try {
-      const response = await fetch("iklan-c.json"); // JSON harus ada di folder c
+      // Ambil JSON khusus folder c
+      const response = await fetch("iklan-c.json");
       const ads = await response.json();
 
       const ad = ads.find(item => item.id === adId);
@@ -34,7 +43,7 @@
       if (ad) {
         window.location.href = ad.Url;
       } else {
-        console.error("ID iklan tidak valid.");
+        console.error("ID iklan tidak valid:", adId);
       }
     } catch (error) {
       console.error("Gagal mengambil data iklan:", error);
