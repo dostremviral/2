@@ -1,28 +1,47 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <title>Redirect</title>
-    <script type="text/javascript">
-      var pathSegmentsToKeep = 0;
+<head>
+  <meta charset="utf-8" />
+  <title>Redirect</title>
+</head>
+<body>
+<script>
+(function() {
+  const path = location.pathname;
 
-      var l = window.location;
-      l.replace(
-        l.protocol +
-          "//" +
-          l.hostname +
-          (l.port ? ":" + l.port : "") +
-          l.pathname
-            .split("/")
-            .slice(0, 1 + pathSegmentsToKeep)
-            .join("/") +
-          "/?/" +
-          l.pathname.slice(1).split("/").slice(pathSegmentsToKeep).join("/").replace(/&/g, "~and~") +
-          (l.search ? "&" + l.search.slice(1).replace(/&/g, "~and~") : "") +
-          l.hash
-      );
-    </script>
-  </head>
-  <body></body>
-</html
+  // cek apakah route untuk iklan
+  const match = path.match(/^\/(c|s)\/([^\/]+)\/?$/);
+  if (match) {
+    const folder = match[1];
+    const adId = match[2];
+    const jsonFile = '/' + folder + (folder === 'c' ? '/iklan-c.json' : '/iklan.json');
+
+    fetch(jsonFile).then(r => r.json()).then(ads => {
+      const ad = ads.find(x => x.id === adId);
+      if (ad && ad.Url) {
+        location.href = ad.Url;
+      } else {
+        location.href = '/' + folder + '/?v=' + encodeURIComponent(adId);
+      }
+    }).catch(() => {
+      location.href = '/' + folder + '/?v=' + encodeURIComponent(adId);
+    });
+    return;
+  }
+
+  // fallback ke script lama untuk SPA
+  var pathSegmentsToKeep = 0;
+  var l = window.location;
+  l.replace(
+    l.protocol + "//" + l.hostname +
+    (l.port ? ":" + l.port : "") +
+    l.pathname.split("/").slice(0, 1 + pathSegmentsToKeep).join("/") +
+    "/?/" + l.pathname.slice(1).split("/").slice(pathSegmentsToKeep).join("/").replace(/&/g, "and") +
+    (l.search ? "&" + l.search.slice(1).replace(/&/g, "and") : "") +
+    l.hash
+  );
+})();
+</script>
+</body>
+</html>
 
