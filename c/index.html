@@ -1,38 +1,29 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Iklan Redirect</title>
-</head>
-<body>
-  <script>
-    async function redirectToAd() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const adId = urlParams.get('v');
-      
-      if (!adId) {
-        console.error("ID iklan tidak ditemukan di URL.");
-        return;
-      }
-      
-      try {
-        const response = await fetch('iklan-c.json'); // pakai file JSON khusus folder c
-        const ads = await response.json();
-        
-        const ad = ads.find(item => item.id === adId);
-        
-        if (ad) {
-          window.location.href = ad.Url;
-        } else {
-          console.error("ID iklan tidak valid.");
-        }
-      } catch (error) {
-        console.error("Gagal mengambil data iklan:", error);
-      }
+<script>
+  async function redirectToAd() {
+    // ambil path terakhir setelah /c/
+    const path = window.location.pathname.split("/").pop();
+    const adId = path || null;
+
+    if (!adId) {
+      console.error("ID iklan tidak ditemukan di URL.");
+      return;
     }
-    
-    window.onload = redirectToAd;
-  </script>
-</body>
-</html>
+
+    try {
+      const response = await fetch('iklan-c.json');
+      const ads = await response.json();
+
+      const ad = ads.find(item => item.id === adId);
+
+      if (ad) {
+        window.location.href = ad.Url;
+      } else {
+        console.error("ID iklan tidak valid.");
+      }
+    } catch (error) {
+      console.error("Gagal mengambil data iklan:", error);
+    }
+  }
+
+  window.onload = redirectToAd;
+</script>
