@@ -1,0 +1,28 @@
+<script>
+        async function redirectToAd() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const adId = urlParams.get('v');
+            
+            if (!adId) {
+                console.error("ID iklan tidak ditemukan di URL.");
+                return;
+            }
+            
+            try {
+                const response = await fetch('iklan.json');
+                const ads = await response.json();
+                
+                const ad = ads.find(item => item.id === adId);
+                
+                if (ad) {
+                    window.location.href = ad.Url;
+                } else {
+                    console.error("ID iklan tidak valid.");
+                }
+            } catch (error) {
+                console.error("Gagal mengambil data iklan:", error);
+            }
+        }
+        
+        window.onload = redirectToAd;
+    </script>
